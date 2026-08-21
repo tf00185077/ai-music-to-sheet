@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
 
-PIPELINE_VERSION = "first-verified-monophonic-score/v1"
+PIPELINE_VERSION = "beat-aware-single-melody-score/v1"
 
 PASS = "PASS"
 REVIEW = "REVIEW"
@@ -21,6 +21,9 @@ STAGE_DECODE = "decode"
 STAGE_SCOPE = "scope"
 STAGE_TRANSCRIPTION = "transcription"
 STAGE_NOTE_EVENTS = "note_events"
+STAGE_TIME_MAP = "time_map"
+STAGE_QUANTIZATION = "quantization"
+STAGE_SCORE_IR = "score_ir"
 STAGE_MUSICXML = "musicxml"
 STAGE_EVALUATION = "evaluation"
 STAGE_DELIVERY = "delivery"
@@ -31,6 +34,10 @@ CATEGORY_AUDIO_QUALITY = "AUDIO_QUALITY"
 CATEGORY_UNSUPPORTED_SCOPE = "UNSUPPORTED_SCOPE"
 CATEGORY_TRANSCRIPTION_QUALITY = "TRANSCRIPTION_QUALITY"
 CATEGORY_NOTE_EVENTS_CONTRACT = "NOTE_EVENTS_CONTRACT"
+CATEGORY_TIMEMAP = "TIMEMAP"
+CATEGORY_TIMING = "TIMING"
+CATEGORY_QUANTIZATION = "QUANTIZATION"
+CATEGORY_SCORE_IR_CONTRACT = "SCORE_IR_CONTRACT"
 CATEGORY_MUSICXML_EXPORT = "MUSICXML_EXPORT"
 CATEGORY_EVALUATION = "EVALUATION"
 CATEGORY_DELIVERY = "DELIVERY"
@@ -92,10 +99,16 @@ def validate_note_events_artifact(artifact: Dict[str, Any]) -> List[str]:
             errors.append(f"missing {field}")
 
     previous_offset: Optional[float] = None
+    seen_ids = set()
     for index, note in enumerate(artifact.get("notes", [])):
         for field in ["pitch", "onset", "offset", "duration", "confidence"]:
             if field not in note:
                 errors.append(f"note {index} missing {field}")
+        if "id" in note:
+            note_id = str(note["id"])
+            if note_id in seen_ids:
+                errors.append(f"note {index} duplicate id {note_id}")
+            seen_ids.add(note_id)
         try:
             pitch = int(note["pitch"])
             onset = float(note["onset"])
@@ -119,4 +132,3 @@ def validate_note_events_artifact(artifact: Dict[str, Any]) -> List[str]:
         previous_offset = offset
 
     return errors
-

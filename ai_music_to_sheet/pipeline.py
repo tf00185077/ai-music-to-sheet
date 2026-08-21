@@ -22,7 +22,10 @@ from .contracts import (
     STAGE_MEDIA,
     STAGE_MUSICXML,
     STAGE_NOTE_EVENTS,
+    STAGE_QUANTIZATION,
     STAGE_SCOPE,
+    STAGE_SCORE_IR,
+    STAGE_TIME_MAP,
     STAGE_TRANSCRIPTION,
     PipelineError,
     utc_now,
@@ -32,6 +35,7 @@ from .contracts import (
 from .evaluation import score_notes_against_reference
 from .media import decode_to_canonical_wav, inspect_source
 from .musicxml import export_musicxml
+from .timing import build_score_ir, build_time_map
 from .transcription import CONFIDENCE_REVIEW_THRESHOLD, POLYPHONY_RATIO_THRESHOLD, transcribe_monophonic_wav
 
 
@@ -110,6 +114,12 @@ def process_media_file(
             raise PipelineError(CATEGORY_TRANSCRIPTION_QUALITY, STAGE_TRANSCRIPTION, "No note events could be produced")
         _stage(stages, STAGE_TRANSCRIPTION, PASS, "TRANSCRIPTION_COMPLETE", "Monophonic note events produced")
 
+        notes_with_ids = []
+        for index, note in enumerate(transcription["notes"], start=1):
+            note_with_id = dict(note)
+            note_with_id["id"] = f"note-{index:04d}"
+            notes_with_ids.append(note_with_id)
+
         note_events = {
             "schema_version": "note-events/v1",
             "generator_version": PIPELINE_VERSION,
@@ -121,7 +131,7 @@ def process_media_file(
             "average_confidence": transcription["average_confidence"],
             "average_secondary_ratio": transcription["average_secondary_ratio"],
             "max_secondary_ratio": transcription["max_secondary_ratio"],
-            "notes": transcription["notes"],
+            "notes": notes_with_ids,
         }
         errors = validate_note_events_artifact(note_events)
         if errors:
@@ -131,10 +141,23 @@ def process_media_file(
         artifacts["note_events"] = str(note_events_path)
         _stage(stages, STAGE_NOTE_EVENTS, PASS, "NOTE_EVENTS_VALID", "NoteEvents contract validated")
 
+        time_map = build_time_map(note_events, canonical)
+        time_map_path = output_dir / "time_map.json"
+        write_json(time_map_path, time_map)
+        artifacts["time_map"] = str(time_map_path)
+        _stage(stages, STAGE_TIME_MAP, PASS, "TIME_MAP_VALID", "TimeMap contract validated")
+
+        score_ir = build_score_ir(note_events, time_map)
+        _stage(stages, STAGE_QUANTIZATION, PASS, "QUANTIZATION_VALID", "NoteEvents mapped to supported note values")
+        score_ir_path = output_dir / "score_ir.json"
+        write_json(score_ir_path, score_ir)
+        artifacts["score_ir"] = str(score_ir_path)
+        _stage(stages, STAGE_SCORE_IR, PASS, "SCORE_IR_VALID", "ScoreIR contract validated")
+
         musicxml_path = output_dir / "score.musicxml"
-        musicxml = export_musicxml(note_events, musicxml_path)
+        musicxml = export_musicxml(note_events, musicxml_path, score_ir)
         artifacts["musicxml"] = str(musicxml_path)
-        _stage(stages, STAGE_MUSICXML, PASS, "MUSICXML_VALID", "MusicXML parses and matches NoteEvents")
+        _stage(stages, STAGE_MUSICXML, PASS, "MUSICXML_VALID", "MusicXML parses and matches ScoreIR")
 
         quality_status = PASS
         reason = None
@@ -152,6 +175,8 @@ def process_media_file(
                 "source": source["version"],
                 "canonical_audio": canonical["version"],
                 "note_events": note_events["generator_version"],
+                "time_map": time_map["generator_version"],
+                "score_ir": score_ir["generator_version"],
                 "musicxml": PIPELINE_VERSION,
             }
             evaluation_report = score_notes_against_reference(
@@ -159,6 +184,8 @@ def process_media_file(
                 reference_notes=reference_notes,
                 case_name=str(media_path.name),
                 artifact_versions=artifact_versions,
+                score_ir=score_ir,
+                time_map=time_map,
             )
             evaluation_path = output_dir / "evaluation_report.json"
             write_json(evaluation_path, evaluation_report)

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, Optional
 
 from .contracts import FAIL, PASS, PIPELINE_VERSION, REVIEW, normalized_notes, utc_now, write_json
+from .timing import BEATS_PER_MEASURE, DURATION_TOLERANCE_BEATS, DURATION_VOCABULARY
 
 
 ONSET_TOLERANCE_SECONDS = 0.12
@@ -19,9 +20,13 @@ def score_notes_against_reference(
     reference_notes: Iterable[Dict[str, object]],
     case_name: str,
     artifact_versions: Dict[str, object],
+    score_ir: Optional[Dict[str, object]] = None,
+    time_map: Optional[Dict[str, object]] = None,
 ) -> Dict[str, object]:
-    predicted = normalized_notes(predicted_notes)
-    reference = normalized_notes(reference_notes)
+    predicted_source = list(predicted_notes)
+    reference_source = list(reference_notes)
+    predicted = normalized_notes(predicted_source)
+    reference = normalized_notes(reference_source)
     denominator = max(len(reference), 1)
     paired = list(zip(predicted, reference))
 
@@ -57,6 +62,8 @@ def score_notes_against_reference(
         "duration_tolerance_seconds": DURATION_TOLERANCE_SECONDS,
         "offset_tolerance_seconds": OFFSET_TOLERANCE_SECONDS,
     }
+    if score_ir is not None and time_map is not None:
+        metrics.update(_timing_metrics(score_ir, reference_source, time_map))
     status = _status_for_metrics(metrics)
     return {
         "schema_version": "evaluation-case/v1",
@@ -116,11 +123,78 @@ def _status_for_metrics(metrics: Dict[str, float]) -> str:
         metrics["duration_accuracy"],
         metrics["offset_accuracy"],
     ]
+    if "beat_position_accuracy" in metrics:
+        values.append(metrics["beat_position_accuracy"])
+    if "notated_duration_accuracy" in metrics:
+        values.append(metrics["notated_duration_accuracy"])
     if all(value >= PASS_THRESHOLD for value in values):
         return PASS
     if all(value >= REVIEW_THRESHOLD for value in values):
         return REVIEW
     return FAIL
+
+
+def _timing_metrics(
+    score_ir: Dict[str, object],
+    reference_notes: Iterable[Dict[str, object]],
+    time_map: Dict[str, object],
+) -> Dict[str, float]:
+    score_notes = list(score_ir["parts"][0]["notes"])
+    reference = list(reference_notes)
+    denominator = max(len(reference), 1)
+    paired = list(zip(score_notes, reference))
+    beat_matches = 0
+    duration_matches = 0
+    for score_note, reference_note in paired:
+        expected_measure, expected_beat = _reference_position(reference_note, time_map)
+        expected_duration_beats = _reference_duration_beats(reference_note, time_map)
+        expected_duration_name = reference_note.get("notated_duration")
+        if expected_duration_name is None:
+            expected_duration_name = _duration_name_for_beats(expected_duration_beats)
+
+        same_measure = int(score_note["measure"]) == expected_measure
+        beat_ok = abs(float(score_note["beat"]) - expected_beat) <= float(time_map["tolerances"]["beat_position"])
+        duration_ok = (
+            abs(float(score_note["duration_beats"]) - expected_duration_beats) <= DURATION_TOLERANCE_BEATS
+            and str(score_note["notated_duration"]["name"]) == str(expected_duration_name)
+        )
+        beat_matches += int(same_measure and beat_ok)
+        duration_matches += int(duration_ok)
+
+    return {
+        "score_ir_notes": len(score_notes),
+        "beat_position_accuracy": round(beat_matches / denominator, 6),
+        "notated_duration_accuracy": round(duration_matches / denominator, 6),
+        "beat_position_tolerance": float(time_map["tolerances"]["beat_position"]),
+        "duration_tolerance_beats": DURATION_TOLERANCE_BEATS,
+    }
+
+
+def _reference_position(reference_note: Dict[str, object], time_map: Dict[str, object]):
+    if "measure" in reference_note and "beat" in reference_note:
+        return int(reference_note["measure"]), float(reference_note["beat"])
+    absolute_beat = _reference_absolute_beat(float(reference_note["onset"]), time_map)
+    measure = int(absolute_beat // BEATS_PER_MEASURE) + 1
+    beat = absolute_beat - ((measure - 1) * BEATS_PER_MEASURE) + 1.0
+    return measure, round(beat, 6)
+
+
+def _reference_duration_beats(reference_note: Dict[str, object], time_map: Dict[str, object]) -> float:
+    if "duration_beats" in reference_note:
+        return float(reference_note["duration_beats"])
+    duration = float(reference_note.get("duration", float(reference_note["offset"]) - float(reference_note["onset"])))
+    return round(duration / float(time_map["tempo"]["beat_seconds"]), 6)
+
+
+def _reference_absolute_beat(seconds: float, time_map: Dict[str, object]) -> float:
+    anchor = float(time_map["anchors"][0]["source_seconds"])
+    beat_seconds = float(time_map["tempo"]["beat_seconds"])
+    return round((seconds - anchor) / beat_seconds, 6)
+
+
+def _duration_name_for_beats(duration_beats: float) -> str:
+    name, _beats = min(DURATION_VOCABULARY, key=lambda item: abs(item[1] - duration_beats))
+    return name
 
 
 def _worst_status(statuses: Iterable[str]) -> str:
