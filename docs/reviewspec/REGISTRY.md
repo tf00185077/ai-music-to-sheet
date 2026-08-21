@@ -7,11 +7,16 @@
 
 | key | tier | guarding_test | review |
 |-----|------|---------------|--------|
+| beat-aware-single-melody-score/INT-1 | Core | tests/test_beat_aware_single_melody_score.py::BeatAwareSingleMelodyScoreTests::test_int1_time_map_exposes_reversible_musical_time | docs/reviewspec/beat-aware-single-melody-score/review.md |
+| beat-aware-single-melody-score/INT-2 | Core | tests/test_beat_aware_single_melody_score.py::BeatAwareSingleMelodyScoreTests::test_int2_score_ir_preserves_traceable_quantized_single_voice_notes | docs/reviewspec/beat-aware-single-melody-score/review.md |
+| beat-aware-single-melody-score/INT-3 | Critical | tests/test_beat_aware_single_melody_score.py::BeatAwareSingleMelodyScoreTests::test_int3_musicxml_measure_structure_matches_score_ir | docs/reviewspec/beat-aware-single-melody-score/review.md |
+| beat-aware-single-melody-score/INT-4 | Core | tests/test_beat_aware_single_melody_score.py::BeatAwareSingleMelodyScoreTests::test_int4_evaluation_report_scores_timing_and_cites_artifact_versions | docs/reviewspec/beat-aware-single-melody-score/review.md |
+| beat-aware-single-melody-score/INT-5 | Critical | tests/test_beat_aware_single_melody_score.py::BeatAwareSingleMelodyScoreTests::test_int5_unquantizable_timing_is_not_auto_accepted | docs/reviewspec/beat-aware-single-melody-score/review.md |
 | first-verified-monophonic-score/INT-1 | Critical | tests/test_first_verified_monophonic_score.py::FirstVerifiedMonophonicScoreTests::test_supported_mp3_and_mp4_complete_from_public_entrypoint | docs/reviewspec/first-verified-monophonic-score/review.md |
 | first-verified-monophonic-score/INT-2 | Core | tests/test_first_verified_monophonic_score.py::FirstVerifiedMonophonicScoreTests::test_note_events_are_ordered_traceable_and_non_overlapping | docs/reviewspec/first-verified-monophonic-score/review.md |
 | first-verified-monophonic-score/INT-3 | Critical | tests/test_first_verified_monophonic_score.py::FirstVerifiedMonophonicScoreTests::test_musicxml_is_parseable_single_part_and_matches_note_events | docs/reviewspec/first-verified-monophonic-score/review.md |
 | first-verified-monophonic-score/INT-4 | Core | tests/test_first_verified_monophonic_score.py::FirstVerifiedMonophonicScoreTests::test_self_consistent_shifted_notes_fail_ground_truth_scoring | docs/reviewspec/first-verified-monophonic-score/review.md |
 | first-verified-monophonic-score/INT-5 | Critical | tests/test_first_verified_monophonic_score.py::FirstVerifiedMonophonicScoreTests::test_unsupported_and_low_confidence_results_are_not_auto_accepted | docs/reviewspec/first-verified-monophonic-score/review.md |
 
-**Active intents: 5.** The review-gate must confirm every one still has a passing test each round; a lost or failing guarding test is a regression (FAIL), unless the intent was formally superseded via a spec amendment.
+**Active intents: 10.** The review-gate must confirm every one still has a passing test each round; a lost or failing guarding test is a regression (FAIL), unless the intent was formally superseded via a spec amendment.
 
