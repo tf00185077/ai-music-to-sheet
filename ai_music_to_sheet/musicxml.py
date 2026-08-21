@@ -47,7 +47,7 @@ def export_musicxml(
     part_list = ET.SubElement(root, "part-list")
     score_part = ET.SubElement(part_list, "score-part", {"id": "P1"})
     part_name = ET.SubElement(score_part, "part-name")
-    part_name.text = "Melody"
+    part_name.text = str(part_ir["name"])
 
     part = ET.SubElement(root, "part", {"id": "P1"})
     measure = ET.SubElement(part, "measure", {"number": "1"})
@@ -175,6 +175,98 @@ def export_score_ir_musicxml(score_ir_artifact: Dict[str, object], output_path: 
         "pitch_sequence": [note["pitch"] for note in parsed_notes],
         "time_signature": time_signature,
     }
+
+
+def export_arranged_score_musicxml(arranged_score_artifact: Dict[str, object], output_path: Path) -> Dict[str, object]:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    part_ir = arranged_score_artifact["parts"][0]
+    notes = list(part_ir["notes"])
+    time_signature = arranged_score_artifact["time_signature"]
+    profile = arranged_score_artifact["target_profile"]
+    min_pitch = int(profile["sounded_midi_range"]["min"])
+    max_pitch = int(profile["sounded_midi_range"]["max"])
+
+    root = ET.Element("score-partwise", {"version": "3.1"})
+    movement_title = ET.SubElement(root, "movement-title")
+    movement_title.text = "Target Instrument Arrangement"
+    identification = ET.SubElement(root, "identification")
+    encoding = ET.SubElement(identification, "encoding")
+    software = ET.SubElement(encoding, "software")
+    software.text = str(arranged_score_artifact["generator_version"])
+
+    part_list = ET.SubElement(root, "part-list")
+    score_part = ET.SubElement(part_list, "score-part", {"id": str(part_ir["id"])})
+    part_name = ET.SubElement(score_part, "part-name")
+    part_name.text = str(part_ir["name"])
+
+    part = ET.SubElement(root, "part", {"id": str(part_ir["id"])})
+    measures = part_ir.get("measures") or [{"number": note["measure"]} for note in notes]
+    for measure_info in measures:
+        measure_number = int(measure_info["number"])
+        measure = ET.SubElement(part, "measure", {"number": str(measure_number)})
+        if measure_number == 1:
+            _write_attributes(measure, time_signature)
+
+        measure_start = (measure_number - 1) * int(time_signature["beats_per_measure"])
+        measure_end = measure_start + int(time_signature["beats_per_measure"])
+        cursor = float(measure_start)
+        measure_notes = sorted(
+            [note for note in notes if int(note["measure"]) == measure_number],
+            key=lambda note: float(note["absolute_beat"]),
+        )
+        for arranged_note in measure_notes:
+            start = float(arranged_note["absolute_beat"])
+            if start > cursor + 1e-6:
+                _add_rest(measure, start - cursor)
+            _add_pitched_note(measure, arranged_note)
+            cursor = max(cursor, start + float(arranged_note["duration_beats"]))
+        if cursor < measure_end - 1e-6:
+            _add_rest(measure, measure_end - cursor)
+
+    tree = ET.ElementTree(root)
+    tree.write(output_path, encoding="utf-8", xml_declaration=True)
+
+    parsed_notes = parse_musicxml_score_notes(output_path)
+    expected_notes = [
+        {
+            "measure": int(note["measure"]),
+            "pitch": int(note["pitch"]),
+            "duration": int(note["notated_duration"]["divisions"]),
+            "type": str(note["notated_duration"]["name"]),
+        }
+        for note in notes
+    ]
+    if parsed_notes != expected_notes:
+        raise PipelineError(
+            CATEGORY_MUSICXML_EXPORT,
+            STAGE_MUSICXML,
+            "MusicXML measure, pitch, or duration sequence does not match arranged score",
+        )
+    parsed_part_name = parse_musicxml_part_name(output_path)
+    if parsed_part_name != str(part_ir["name"]):
+        raise PipelineError(CATEGORY_MUSICXML_EXPORT, STAGE_MUSICXML, "MusicXML part name does not match arranged score")
+    out_of_range = [note["pitch"] for note in parsed_notes if int(note["pitch"]) < min_pitch or int(note["pitch"]) > max_pitch]
+    if out_of_range:
+        raise PipelineError(CATEGORY_MUSICXML_EXPORT, STAGE_MUSICXML, "MusicXML contains pitches outside target profile range")
+
+    return {
+        "path": str(output_path),
+        "part_count": 1,
+        "part_name": parsed_part_name,
+        "measure_count": len(measures),
+        "note_count": len(parsed_notes),
+        "pitch_sequence": [note["pitch"] for note in parsed_notes],
+        "time_signature": time_signature,
+        "target_profile": {"id": profile["id"], "version": profile["version"]},
+    }
+
+
+def parse_musicxml_part_name(path: Path) -> Optional[str]:
+    try:
+        root = ET.parse(path).getroot()
+    except ET.ParseError as error:
+        raise PipelineError(CATEGORY_MUSICXML_EXPORT, STAGE_MUSICXML, f"MusicXML is not parseable: {error}")
+    return root.findtext("./part-list/score-part/part-name")
 
 
 def parse_musicxml_pitches(path: Path) -> List[int]:

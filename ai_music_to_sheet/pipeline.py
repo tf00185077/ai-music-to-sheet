@@ -4,6 +4,7 @@ import uuid
 from pathlib import Path
 from typing import Dict, Iterable, Optional
 
+from .arrangement import ArrangementNotAccepted, arrange_score_ir, get_instrument_profile
 from .contracts import (
     ACCEPTED,
     CATEGORY_EVALUATION,
@@ -19,6 +20,8 @@ from .contracts import (
     STAGE_DECODE,
     STAGE_DELIVERY,
     STAGE_EVALUATION,
+    STAGE_ARRANGEMENT,
+    STAGE_INSTRUMENT_PROFILE,
     STAGE_MEDIA,
     STAGE_MUSICXML,
     STAGE_NOTE_EVENTS,
@@ -34,7 +37,7 @@ from .contracts import (
 )
 from .evaluation import score_notes_against_reference
 from .media import decode_to_canonical_wav, inspect_source
-from .musicxml import export_musicxml
+from .musicxml import export_arranged_score_musicxml, export_musicxml
 from .timing import build_score_ir, build_time_map
 from .transcription import CONFIDENCE_REVIEW_THRESHOLD, POLYPHONY_RATIO_THRESHOLD, transcribe_monophonic_wav
 
@@ -46,6 +49,7 @@ def process_media_file(
     reference_notes: Optional[Iterable[Dict[str, object]]] = None,
     job_id: Optional[str] = None,
     run_id: Optional[str] = None,
+    target_profile_id: Optional[str] = None,
 ) -> Dict[str, object]:
     """Process one clean monophonic MP3/MP4 file into NoteEvents and MusicXML artifacts."""
 
@@ -61,6 +65,9 @@ def process_media_file(
         "input_format": "",
     }
     evaluation_report = None
+    target_profile = None
+    arranged_score = None
+    musicxml = None
 
     def finish(job_state: str, quality_status: str, reason=None) -> Dict[str, object]:
         acceptance = ACCEPTED if job_state == COMPLETED and quality_status == PASS and reason is None else NOT_ACCEPTED
@@ -78,6 +85,8 @@ def process_media_file(
             "artifacts": artifacts.copy(),
             "stages": stages.copy(),
         }
+        if target_profile is not None:
+            result["target_profile"] = target_profile
         if evaluation_report is not None:
             result["evaluation_report"] = evaluation_report
         result_path = output_dir / "result.json"
@@ -154,10 +163,48 @@ def process_media_file(
         artifacts["score_ir"] = str(score_ir_path)
         _stage(stages, STAGE_SCORE_IR, PASS, "SCORE_IR_VALID", "ScoreIR contract validated")
 
-        musicxml_path = output_dir / "score.musicxml"
-        musicxml = export_musicxml(note_events, musicxml_path, score_ir)
-        artifacts["musicxml"] = str(musicxml_path)
-        _stage(stages, STAGE_MUSICXML, PASS, "MUSICXML_VALID", "MusicXML parses and matches ScoreIR")
+        if target_profile_id is not None:
+            target_profile = get_instrument_profile(str(target_profile_id))
+            target_profile_path = output_dir / "target_profile.json"
+            write_json(target_profile_path, target_profile)
+            artifacts["target_profile"] = str(target_profile_path)
+            _stage(
+                stages,
+                STAGE_INSTRUMENT_PROFILE,
+                PASS,
+                "INSTRUMENT_PROFILE_VALID",
+                "Supported target profile contract validated",
+            )
+
+            arranged_score = arrange_score_ir(
+                score_ir,
+                target_profile=target_profile,
+                source=source,
+                source_artifact_path=artifacts["source"],
+                score_ir_artifact_path=artifacts["score_ir"],
+                time_map=time_map,
+                time_map_artifact_path=artifacts["time_map"],
+            )
+            arranged_score_path = output_dir / "arranged_score.json"
+            write_json(arranged_score_path, arranged_score)
+            artifacts["arranged_score"] = str(arranged_score_path)
+            _stage(
+                stages,
+                STAGE_ARRANGEMENT,
+                PASS,
+                "ARRANGED_SCORE_VALID",
+                "Arranged score contract validated for the target profile",
+            )
+
+            musicxml_path = output_dir / "score.musicxml"
+            musicxml = export_arranged_score_musicxml(arranged_score, musicxml_path)
+            artifacts["musicxml"] = str(musicxml_path)
+            _stage(stages, STAGE_MUSICXML, PASS, "MUSICXML_VALID", "MusicXML parses and matches arranged score")
+        else:
+            musicxml_path = output_dir / "score.musicxml"
+            musicxml = export_musicxml(note_events, musicxml_path, score_ir)
+            artifacts["musicxml"] = str(musicxml_path)
+            _stage(stages, STAGE_MUSICXML, PASS, "MUSICXML_VALID", "MusicXML parses and matches ScoreIR")
 
         quality_status = PASS
         reason = None
@@ -179,6 +226,9 @@ def process_media_file(
                 "score_ir": score_ir["generator_version"],
                 "musicxml": PIPELINE_VERSION,
             }
+            if target_profile is not None and arranged_score is not None:
+                artifact_versions["target_profile"] = target_profile["version"]
+                artifact_versions["arranged_score"] = arranged_score["generator_version"]
             evaluation_report = score_notes_against_reference(
                 predicted_notes=note_events["notes"],
                 reference_notes=reference_notes,
@@ -186,6 +236,8 @@ def process_media_file(
                 artifact_versions=artifact_versions,
                 score_ir=score_ir,
                 time_map=time_map,
+                arranged_score=arranged_score,
+                musicxml_summary=musicxml,
             )
             evaluation_path = output_dir / "evaluation_report.json"
             write_json(evaluation_path, evaluation_report)
@@ -212,6 +264,9 @@ def process_media_file(
     except PipelineError as error:
         _stage(stages, error.stage, FAIL, error.category, error.message)
         return finish(FAIL, FAIL, error.reason())
+    except ArrangementNotAccepted as error:
+        _stage(stages, error.stage, REVIEW, error.category, error.message)
+        return finish(REVIEW, REVIEW, error.reason())
 
 
 def _stage(stages, stage, status, category, message) -> None:

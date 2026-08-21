@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional
 
+from .arrangement import score_arrangement_quality
 from .contracts import FAIL, PASS, PIPELINE_VERSION, REVIEW, normalized_notes, utc_now, write_json
 from .timing import BEATS_PER_MEASURE, DURATION_TOLERANCE_BEATS, DURATION_VOCABULARY
 
@@ -22,6 +23,8 @@ def score_notes_against_reference(
     artifact_versions: Dict[str, object],
     score_ir: Optional[Dict[str, object]] = None,
     time_map: Optional[Dict[str, object]] = None,
+    arranged_score: Optional[Dict[str, object]] = None,
+    musicxml_summary: Optional[Dict[str, object]] = None,
 ) -> Dict[str, object]:
     predicted_source = list(predicted_notes)
     reference_source = list(reference_notes)
@@ -65,7 +68,15 @@ def score_notes_against_reference(
     if score_ir is not None and time_map is not None:
         metrics.update(_timing_metrics(score_ir, reference_source, time_map))
     status = _status_for_metrics(metrics)
-    return {
+    arrangement_report = None
+    if arranged_score is not None and score_ir is not None and musicxml_summary is not None:
+        arrangement_report = score_arrangement_quality(
+            arranged_score=arranged_score,
+            source_score_ir=score_ir,
+            musicxml_summary=musicxml_summary,
+        )
+        status = _worst_status([status, arrangement_report["status"]])
+    report = {
         "schema_version": "evaluation-case/v1",
         "generator_version": PIPELINE_VERSION,
         "created_at": utc_now(),
@@ -74,6 +85,9 @@ def score_notes_against_reference(
         "metrics": metrics,
         "artifact_versions": artifact_versions,
     }
+    if arrangement_report is not None:
+        report["arrangement"] = arrangement_report
+    return report
 
 
 def run_evaluation_corpus(cases: List[Dict[str, object]], output_dir: Path) -> Dict[str, object]:
@@ -91,6 +105,7 @@ def run_evaluation_corpus(cases: List[Dict[str, object]], output_dir: Path) -> D
             case_dir,
             reference_notes=case["reference_notes"],
             job_id=f"eval-{case_name}",
+            target_profile_id=case.get("target_profile_id"),
         )
         case_report = result["evaluation_report"]
         case_report["case_name"] = case_name

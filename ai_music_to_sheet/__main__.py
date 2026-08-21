@@ -11,13 +11,13 @@ def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Process a clean monophonic MP3/MP4 into NoteEvents and MusicXML.")
     parser.add_argument("media_path", help="Input MP3 or MP4 file")
     parser.add_argument("output_dir", help="Directory where artifacts will be written")
+    parser.add_argument("--target-profile", dest="target_profile_id", help="Supported target instrument profile id")
     args = parser.parse_args(argv)
 
-    result = process_media_file(args.media_path, args.output_dir)
+    result = process_media_file(args.media_path, args.output_dir, target_profile_id=args.target_profile_id)
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0 if result["job_state"] in {"COMPLETED", "REVIEW"} else 1
 
 
 if __name__ == "__main__":
     sys.exit(main())
-
