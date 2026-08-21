@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import json
 import uuid
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Dict, Iterable, Optional
 
 from .arrangement import ArrangementNotAccepted, arrange_score_ir, get_instrument_profile
 from .contracts import (
     ACCEPTED,
+    CATEGORY_DELIVERY,
     CATEGORY_EVALUATION,
     CATEGORY_NOTE_EVENTS_CONTRACT,
     CATEGORY_TRANSCRIPTION_QUALITY,
@@ -35,7 +38,7 @@ from .contracts import (
     validate_note_events_artifact,
     write_json,
 )
-from .evaluation import score_notes_against_reference
+from .evaluation import build_runtime_validation_report, score_notes_against_reference
 from .media import decode_to_canonical_wav, inspect_source
 from .musicxml import export_arranged_score_musicxml, export_musicxml
 from .timing import build_score_ir, build_time_map
@@ -217,18 +220,8 @@ def process_media_file(
             }
             _stage(stages, STAGE_TRANSCRIPTION, REVIEW, CATEGORY_TRANSCRIPTION_QUALITY, reason["message"])
 
+        artifact_versions = _artifact_versions(source, canonical, note_events, time_map, score_ir, target_profile, arranged_score)
         if reference_notes is not None:
-            artifact_versions = {
-                "source": source["version"],
-                "canonical_audio": canonical["version"],
-                "note_events": note_events["generator_version"],
-                "time_map": time_map["generator_version"],
-                "score_ir": score_ir["generator_version"],
-                "musicxml": PIPELINE_VERSION,
-            }
-            if target_profile is not None and arranged_score is not None:
-                artifact_versions["target_profile"] = target_profile["version"]
-                artifact_versions["arranged_score"] = arranged_score["generator_version"]
             evaluation_report = score_notes_against_reference(
                 predicted_notes=note_events["notes"],
                 reference_notes=reference_notes,
@@ -239,23 +232,40 @@ def process_media_file(
                 arranged_score=arranged_score,
                 musicxml_summary=musicxml,
             )
-            evaluation_path = output_dir / "evaluation_report.json"
-            write_json(evaluation_path, evaluation_report)
-            artifacts["evaluation_report"] = str(evaluation_path)
-            _stage(
-                stages,
-                STAGE_EVALUATION,
-                evaluation_report["status"],
-                "EVALUATION_COMPLETE",
-                "Ground-truth evaluation report produced",
+            evaluation_message = "Ground-truth evaluation report produced"
+        else:
+            evaluation_report = build_runtime_validation_report(
+                case_name=str(media_path.name),
+                artifact_versions=artifact_versions,
+                note_events=note_events,
+                score_ir=score_ir,
+                time_map=time_map,
+                musicxml_summary=musicxml,
+                arranged_score=arranged_score,
             )
-            if evaluation_report["status"] != PASS:
-                quality_status = evaluation_report["status"]
-                reason = {
-                    "category": CATEGORY_EVALUATION,
-                    "stage": STAGE_EVALUATION,
-                    "message": "Ground-truth evaluation did not meet automatic acceptance thresholds",
-                }
+            evaluation_message = "No-reference runtime validation report produced"
+
+        evaluation_path = output_dir / "evaluation_report.json"
+        write_json(evaluation_path, evaluation_report)
+        artifacts["evaluation_report"] = str(evaluation_path)
+        _stage(
+            stages,
+            STAGE_EVALUATION,
+            evaluation_report["status"],
+            "EVALUATION_COMPLETE",
+            evaluation_message,
+        )
+        if evaluation_report["status"] != PASS:
+            quality_status = evaluation_report["status"]
+            reason = {
+                "category": CATEGORY_EVALUATION,
+                "stage": STAGE_EVALUATION,
+                "message": "Evaluation or runtime validation did not meet automatic acceptance thresholds",
+            }
+
+        bundle_errors = _validate_output_bundle(artifacts, target_profile is not None)
+        if bundle_errors:
+            raise PipelineError(CATEGORY_DELIVERY, STAGE_DELIVERY, "; ".join(bundle_errors))
 
         _stage(stages, STAGE_DELIVERY, PASS, "ARTIFACTS_DELIVERED", "Result manifest and artifacts written")
         job_state = COMPLETED if quality_status == PASS else REVIEW
@@ -279,3 +289,63 @@ def _stage(stages, stage, status, category, message) -> None:
             "created_at": utc_now(),
         }
     )
+
+
+def _artifact_versions(
+    source: Dict[str, object],
+    canonical: Dict[str, object],
+    note_events: Dict[str, object],
+    time_map: Dict[str, object],
+    score_ir: Dict[str, object],
+    target_profile: Optional[Dict[str, object]],
+    arranged_score: Optional[Dict[str, object]],
+) -> Dict[str, object]:
+    versions = {
+        "source": source["version"],
+        "canonical_audio": canonical["version"],
+        "note_events": note_events["generator_version"],
+        "time_map": time_map["generator_version"],
+        "score_ir": score_ir["generator_version"],
+        "musicxml": PIPELINE_VERSION,
+    }
+    if target_profile is not None:
+        versions["target_profile"] = target_profile["version"]
+    if arranged_score is not None:
+        versions["arranged_score"] = arranged_score["generator_version"]
+    return versions
+
+
+def _validate_output_bundle(artifacts: Dict[str, str], has_target_profile: bool) -> list:
+    required = [
+        "source",
+        "canonical_audio",
+        "note_events",
+        "time_map",
+        "score_ir",
+        "musicxml",
+        "evaluation_report",
+    ]
+    if has_target_profile:
+        required.extend(["target_profile", "arranged_score"])
+
+    errors = []
+    for artifact_name in required:
+        artifact_path = artifacts.get(artifact_name)
+        if not artifact_path:
+            errors.append(f"missing required artifact {artifact_name}")
+            continue
+        path = Path(artifact_path)
+        if not path.exists():
+            errors.append(f"artifact {artifact_name} does not exist at {artifact_path}")
+            continue
+        if artifact_name == "musicxml":
+            try:
+                ET.parse(path)
+            except ET.ParseError as error:
+                errors.append(f"musicxml artifact is not parseable: {error}")
+        elif path.suffix == ".json":
+            try:
+                json.loads(path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError as error:
+                errors.append(f"json artifact {artifact_name} is not parseable: {error}")
+    return errors

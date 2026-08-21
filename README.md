@@ -1,5 +1,98 @@
 # 原曲轉樂譜與樂器改編
 
+## First CLI MVP
+
+This repository currently ships a first command-line MVP for clean, single-melody local MP3 or MP4 files. It produces MusicXML plus machine-readable JSON artifacts for inspection and downstream reuse. The supported public entry point is:
+
+```bash
+python -m ai_music_to_sheet input.mp3 out/score-mp3
+```
+
+```bash
+python -m ai_music_to_sheet input.mp4 out/score-mp4
+```
+
+### Prerequisites
+
+- Python 3.9 or newer.
+- `ffmpeg` and `ffprobe` available on `PATH`.
+- A clean monophonic local `.mp3` or `.mp4` recording. The MVP is intentionally scoped to one clear melody line.
+
+### Setup
+
+From a clean checkout:
+
+```bash
+python -m pip install -e .
+```
+
+Then run the documented CLI from the repository or any environment where the package is importable:
+
+```bash
+python -m ai_music_to_sheet input.mp3 out/score-mp3
+python -m ai_music_to_sheet input.mp4 out/score-mp4
+```
+
+For the supported target-instrument arrangement path:
+
+```bash
+python -m ai_music_to_sheet input.mp3 out/recorder-score --target-profile beginner-soprano-recorder
+```
+
+### Output Files
+
+Accepted runs write a bundle into the output directory:
+
+- `result.json`: job state, acceptance, reason, stages, source metadata, and artifact paths.
+- `score.musicxml`: parseable single-part MusicXML for the source melody, or target-instrument MusicXML when `--target-profile beginner-soprano-recorder` is requested.
+- `evaluation_report.json`: machine-readable EvaluationReport. Ordinary no-reference user runs use `mode: runtime_validation` and `reference_available: false`; they do not claim ground-truth transcription accuracy.
+- `source.json`: source media metadata, hash, duration, codec, and input format.
+- `canonical_audio.json`: canonical decode metadata for the generated mono WAV.
+- `canonical.wav`: the decoded mono PCM audio used by the pipeline.
+- `note_events.json`: ordered note events with pitch, timing, confidence, job, and source traceability.
+- `time_map.json`: deterministic beat/time mapping for the accepted single-melody score.
+- `score_ir.json`: quantized score representation used for MusicXML export.
+- `target_profile.json` and `arranged_score.json`: written only for supported target-profile runs.
+
+### Status And Exit Codes
+
+The CLI prints one JSON result object to stdout. Human-readable media-tool diagnostics stay off stdout.
+
+- `ACCEPTED`: `job_state` is `COMPLETED`, `quality_status` is `PASS`, and the output bundle is complete. Exit code `0`.
+- `REVIEW`: the input ran through enough of the pipeline to produce diagnostics, but the result is outside automatic acceptance. Exit code is non-zero.
+- `FAIL`: the input, environment, artifact contract, export, or delivery path failed. Exit code is non-zero.
+- `NOT_ACCEPTED`: appears in `result.json` for every `REVIEW` or `FAIL` result.
+
+### Troubleshooting
+
+- `MEDIA_DECODE` at stage `media` mentioning `ffprobe`: install `ffmpeg`/`ffprobe` or fix `PATH`.
+- `MEDIA_DECODE` at stage `decode` mentioning `ffmpeg`: install `ffmpeg`, fix `PATH`, or provide a readable MP3/MP4 with an audio stream.
+- `UNSUPPORTED_FORMAT`: use `.mp3`, `.mp4`, or `.m4a` media for this MVP.
+- `UNSUPPORTED_SCOPE`: the recording sounds mixed or polyphonic; use a clean single-melody recording.
+- `TRANSCRIPTION_QUALITY`: the melody was detected but confidence was too low for automatic delivery.
+- `INSTRUMENT_PROFILE`: the requested target profile is not supported. Use `--target-profile beginner-soprano-recorder`.
+- `ARRANGEMENT_RANGE`: the melody cannot fit the supported target with one global octave shift.
+
+### Certification Support
+
+The smoke script generates temporary MP3 and MP4 fixtures, runs the documented CLI, parses the resulting JSON and MusicXML, and leaves outputs in the run scratch directory or system temp:
+
+```bash
+python scripts/smoke_cli_mvp.py
+```
+
+For a full release check, set `REVIEWSPEC_CORE` to the local reviewspec-core skill directory and run:
+
+```bash
+REVIEWSPEC_CORE=/path/to/reviewspec-core scripts/certify_first_cli_mvp.sh
+```
+
+That script runs the complete unittest suite, all Reviewspec spec validators, a compile check, registry build, MP3/MP4 CLI smoke, registry diff check, and clean-tree status.
+
+### First-MVP Limitations
+
+This MVP does not support mixed or polyphonic commercial recordings, stem separation, YouTube ingestion, GUI/web UI, PDF rendering, TAB rendering, manual correction, rich arrangement optimization, transposing/written-pitch semantics, per-note octave wrapping, or multi-instrument orchestration.
+
 > [!IMPORTANT]
 > 本文件記錄專案的初步討論結果，不是不可變更的最終規格。專案目標、流程切割與里程碑都可以隨研究結果持續討論及修改。本文刻意不指定技術棧，也不描述更詳細的實作方法。
 

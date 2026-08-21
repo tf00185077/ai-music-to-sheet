@@ -90,6 +90,78 @@ def score_notes_against_reference(
     return report
 
 
+def build_runtime_validation_report(
+    *,
+    case_name: str,
+    artifact_versions: Dict[str, object],
+    note_events: Dict[str, object],
+    score_ir: Dict[str, object],
+    time_map: Dict[str, object],
+    musicxml_summary: Dict[str, object],
+    arranged_score: Optional[Dict[str, object]] = None,
+) -> Dict[str, object]:
+    checks = [
+        {
+            "name": "note_events_present",
+            "status": PASS if note_events.get("notes") else FAIL,
+            "message": "NoteEvents artifact contains note events",
+        },
+        {
+            "name": "time_map_traceable",
+            "status": PASS if time_map.get("note_mappings") else FAIL,
+            "message": "TimeMap cites source note mappings",
+        },
+        {
+            "name": "score_ir_traceable",
+            "status": PASS if score_ir.get("parts") else FAIL,
+            "message": "ScoreIR contains a single melody part",
+        },
+        {
+            "name": "musicxml_parseback",
+            "status": PASS if musicxml_summary.get("note_count") else FAIL,
+            "message": "MusicXML exporter parsed the written score artifact",
+        },
+    ]
+    arrangement_report = None
+    if arranged_score is not None:
+        arrangement_report = score_arrangement_quality(
+            arranged_score=arranged_score,
+            source_score_ir=score_ir,
+            musicxml_summary=musicxml_summary,
+        )
+        checks.append(
+            {
+                "name": "arrangement_runtime_validation",
+                "status": arrangement_report["status"],
+                "message": "Arranged score fits target range and matches target MusicXML",
+            }
+        )
+
+    status = _worst_status(check["status"] for check in checks)
+    metrics = {
+        "note_count": len(note_events.get("notes", [])),
+        "score_part_count": len(score_ir.get("parts", [])),
+        "musicxml_note_count": int(musicxml_summary.get("note_count") or 0),
+        "time_map_note_mappings": len(time_map.get("note_mappings", [])),
+        "average_confidence": round(float(note_events.get("average_confidence", 0.0)), 6),
+    }
+    report = {
+        "schema_version": "evaluation-report/v1",
+        "generator_version": PIPELINE_VERSION,
+        "created_at": utc_now(),
+        "case_name": case_name,
+        "mode": "runtime_validation",
+        "reference_available": False,
+        "status": status,
+        "metrics": metrics,
+        "checks": checks,
+        "artifact_versions": artifact_versions,
+    }
+    if arrangement_report is not None:
+        report["arrangement"] = arrangement_report
+    return report
+
+
 def run_evaluation_corpus(cases: List[Dict[str, object]], output_dir: Path) -> Dict[str, object]:
     from .pipeline import process_media_file
 
