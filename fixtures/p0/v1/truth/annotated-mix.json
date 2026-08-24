@@ -1,0 +1,25 @@
+{
+  "beats": [
+    0.0,
+    0.125
+  ],
+  "downbeats": [
+    0.0
+  ],
+  "instrument_presence": {
+    "drums": "present",
+    "guitar": "present",
+    "piano": "present"
+  },
+  "meter": {
+    "denominator": 4,
+    "numerator": 4
+  },
+  "sections": [
+    {
+      "end_seconds": 0.25,
+      "label": "A",
+      "start_seconds": 0.0
+    }
+  ]
+}

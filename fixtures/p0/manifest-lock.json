@@ -1,0 +1,5 @@
+{
+  "dataset_version": "p0-fixtures/1.0.0",
+  "manifest_sha256": "5a4616e8115b48eba5fc362fc8ec0bc0e4b7008aff09d4a4cf637fcbea2fc032",
+  "policy": "Changing any file or manifest under v1 requires a new dataset version and lock entry"
+}

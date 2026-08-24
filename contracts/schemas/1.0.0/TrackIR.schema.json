@@ -1,0 +1,949 @@
+{
+  "$id": "https://ai-music-to-sheet.invalid/contracts/1.0.0/TrackIR.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "allOf": [
+    {
+      "$ref": "common.schema.json"
+    },
+    {
+      "properties": {
+        "artifact_type": {
+          "const": "TrackIR"
+        },
+        "payload": {
+          "additionalProperties": true,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "mode": {
+                    "const": "transcription"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "events": {
+                    "items": {
+                      "not": {
+                        "required": [
+                          "arrangement_decision"
+                        ]
+                      },
+                      "required": [
+                        "evidence"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "mode": {
+                    "const": "arrangement"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "events": {
+                    "items": {
+                      "not": {
+                        "required": [
+                          "evidence"
+                        ]
+                      },
+                      "required": [
+                        "arrangement_decision"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "instrument": {
+                    "const": "drums"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "events": {
+                    "items": {
+                      "required": [
+                        "drum_class",
+                        "technique"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "instrument": {
+                    "const": "piano"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "events": {
+                    "items": {
+                      "required": [
+                        "pitch",
+                        "voice",
+                        "hand",
+                        "pedal"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "instrument": {
+                    "const": "guitar"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "events": {
+                    "items": {
+                      "required": [
+                        "pitch",
+                        "string",
+                        "fret",
+                        "tuning",
+                        "capo",
+                        "technique"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "events": {
+              "items": {
+                "additionalProperties": true,
+                "allOf": [
+                  {
+                    "else": {
+                      "properties": {
+                        "failure": {
+                          "required": [
+                            "family",
+                            "code",
+                            "reason"
+                          ],
+                          "type": "object"
+                        }
+                      }
+                    },
+                    "if": {
+                      "properties": {
+                        "status": {
+                          "const": "success"
+                        }
+                      }
+                    },
+                    "then": {
+                      "properties": {
+                        "failure": {
+                          "type": "null"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "properties": {
+                  "arrangement_decision": {
+                    "additionalProperties": true,
+                    "properties": {
+                      "reason": {
+                        "type": "string"
+                      },
+                      "rule": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "rule",
+                      "reason"
+                    ],
+                    "type": "object"
+                  },
+                  "capo": {
+                    "additionalProperties": true,
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "state": {
+                              "const": "unknown"
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "confidence": {
+                              "type": "null"
+                            },
+                            "value": {
+                              "type": "null"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "state": {
+                              "enum": [
+                                "known",
+                                "low_confidence"
+                              ]
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "confidence": {
+                              "maximum": 1,
+                              "minimum": 0,
+                              "type": "number"
+                            },
+                            "value": {
+                              "not": {
+                                "type": "null"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "properties": {
+                      "confidence": {
+                        "maximum": 1,
+                        "minimum": 0,
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "state": {
+                        "enum": [
+                          "known",
+                          "unknown",
+                          "low_confidence"
+                        ]
+                      },
+                      "value": {}
+                    },
+                    "required": [
+                      "state",
+                      "value",
+                      "confidence"
+                    ],
+                    "type": "object"
+                  },
+                  "confidence": {
+                    "additionalProperties": true,
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "state": {
+                              "const": "unknown"
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "confidence": {
+                              "type": "null"
+                            },
+                            "value": {
+                              "type": "null"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "state": {
+                              "enum": [
+                                "known",
+                                "low_confidence"
+                              ]
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "confidence": {
+                              "maximum": 1,
+                              "minimum": 0,
+                              "type": "number"
+                            },
+                            "value": {
+                              "not": {
+                                "type": "null"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "properties": {
+                      "confidence": {
+                        "maximum": 1,
+                        "minimum": 0,
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "state": {
+                        "enum": [
+                          "known",
+                          "unknown",
+                          "low_confidence"
+                        ]
+                      },
+                      "value": {}
+                    },
+                    "required": [
+                      "state",
+                      "value",
+                      "confidence"
+                    ],
+                    "type": "object"
+                  },
+                  "drum_class": {
+                    "type": "string"
+                  },
+                  "event_id": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "evidence": {
+                    "minItems": 1,
+                    "type": "array"
+                  },
+                  "fret": {
+                    "additionalProperties": true,
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "state": {
+                              "const": "unknown"
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "confidence": {
+                              "type": "null"
+                            },
+                            "value": {
+                              "type": "null"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "state": {
+                              "enum": [
+                                "known",
+                                "low_confidence"
+                              ]
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "confidence": {
+                              "maximum": 1,
+                              "minimum": 0,
+                              "type": "number"
+                            },
+                            "value": {
+                              "not": {
+                                "type": "null"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "properties": {
+                      "confidence": {
+                        "maximum": 1,
+                        "minimum": 0,
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "state": {
+                        "enum": [
+                          "known",
+                          "unknown",
+                          "low_confidence"
+                        ]
+                      },
+                      "value": {}
+                    },
+                    "required": [
+                      "state",
+                      "value",
+                      "confidence"
+                    ],
+                    "type": "object"
+                  },
+                  "hand": {
+                    "additionalProperties": true,
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "state": {
+                              "const": "unknown"
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "confidence": {
+                              "type": "null"
+                            },
+                            "value": {
+                              "type": "null"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "state": {
+                              "enum": [
+                                "known",
+                                "low_confidence"
+                              ]
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "confidence": {
+                              "maximum": 1,
+                              "minimum": 0,
+                              "type": "number"
+                            },
+                            "value": {
+                              "not": {
+                                "type": "null"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "properties": {
+                      "confidence": {
+                        "maximum": 1,
+                        "minimum": 0,
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "state": {
+                        "enum": [
+                          "known",
+                          "unknown",
+                          "low_confidence"
+                        ]
+                      },
+                      "value": {}
+                    },
+                    "required": [
+                      "state",
+                      "value",
+                      "confidence"
+                    ],
+                    "type": "object"
+                  },
+                  "offset_seconds": {
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  "onset_seconds": {
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  "pedal": {
+                    "additionalProperties": true,
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "state": {
+                              "const": "unknown"
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "confidence": {
+                              "type": "null"
+                            },
+                            "value": {
+                              "type": "null"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "state": {
+                              "enum": [
+                                "known",
+                                "low_confidence"
+                              ]
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "confidence": {
+                              "maximum": 1,
+                              "minimum": 0,
+                              "type": "number"
+                            },
+                            "value": {
+                              "not": {
+                                "type": "null"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "properties": {
+                      "confidence": {
+                        "maximum": 1,
+                        "minimum": 0,
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "state": {
+                        "enum": [
+                          "known",
+                          "unknown",
+                          "low_confidence"
+                        ]
+                      },
+                      "value": {}
+                    },
+                    "required": [
+                      "state",
+                      "value",
+                      "confidence"
+                    ],
+                    "type": "object"
+                  },
+                  "pitch": {
+                    "maximum": 127,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "string": {
+                    "additionalProperties": true,
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "state": {
+                              "const": "unknown"
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "confidence": {
+                              "type": "null"
+                            },
+                            "value": {
+                              "type": "null"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "state": {
+                              "enum": [
+                                "known",
+                                "low_confidence"
+                              ]
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "confidence": {
+                              "maximum": 1,
+                              "minimum": 0,
+                              "type": "number"
+                            },
+                            "value": {
+                              "not": {
+                                "type": "null"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "properties": {
+                      "confidence": {
+                        "maximum": 1,
+                        "minimum": 0,
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "state": {
+                        "enum": [
+                          "known",
+                          "unknown",
+                          "low_confidence"
+                        ]
+                      },
+                      "value": {}
+                    },
+                    "required": [
+                      "state",
+                      "value",
+                      "confidence"
+                    ],
+                    "type": "object"
+                  },
+                  "technique": {
+                    "additionalProperties": true,
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "state": {
+                              "const": "unknown"
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "confidence": {
+                              "type": "null"
+                            },
+                            "value": {
+                              "type": "null"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "state": {
+                              "enum": [
+                                "known",
+                                "low_confidence"
+                              ]
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "confidence": {
+                              "maximum": 1,
+                              "minimum": 0,
+                              "type": "number"
+                            },
+                            "value": {
+                              "not": {
+                                "type": "null"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ],
+                    "properties": {
+                      "confidence": {
+                        "maximum": 1,
+                        "minimum": 0,
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "state": {
+                        "enum": [
+                          "known",
+                          "unknown",
+                          "low_confidence"
+                        ]
+                      },
+                      "value": {}
+                    },
+                    "required": [
+                      "state",
+                      "value",
+                      "confidence"
+                    ],
+                    "type": "object"
+                  },
+                  "tuning": {
+                    "items": {
+                      "additionalProperties": true,
+                      "allOf": [
+                        {
+                          "if": {
+                            "properties": {
+                              "state": {
+                                "const": "unknown"
+                              }
+                            }
+                          },
+                          "then": {
+                            "properties": {
+                              "confidence": {
+                                "type": "null"
+                              },
+                              "value": {
+                                "type": "null"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "properties": {
+                              "state": {
+                                "enum": [
+                                  "known",
+                                  "low_confidence"
+                                ]
+                              }
+                            }
+                          },
+                          "then": {
+                            "properties": {
+                              "confidence": {
+                                "maximum": 1,
+                                "minimum": 0,
+                                "type": "number"
+                              },
+                              "value": {
+                                "not": {
+                                  "type": "null"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ],
+                      "properties": {
+                        "confidence": {
+                          "maximum": 1,
+                          "minimum": 0,
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "state": {
+                          "enum": [
+                            "known",
+                            "unknown",
+                            "low_confidence"
+                          ]
+                        },
+                        "value": {}
+                      },
+                      "required": [
+                        "state",
+                        "value",
+                        "confidence"
+                      ],
+                      "type": "object"
+                    },
+                    "maxItems": 6,
+                    "minItems": 6,
+                    "type": "array"
+                  },
+                  "velocity": {
+                    "maximum": 127,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "voice": {
+                    "minimum": 1,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "event_id",
+                  "onset_seconds",
+                  "velocity",
+                  "confidence"
+                ],
+                "type": "object"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
+            "instrument": {
+              "enum": [
+                "drums",
+                "piano",
+                "guitar"
+              ]
+            },
+            "instrument_presence": {
+              "additionalProperties": true,
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "state": {
+                        "const": "unknown"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "confidence": {
+                        "type": "null"
+                      },
+                      "value": {
+                        "type": "null"
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "state": {
+                        "enum": [
+                          "known",
+                          "low_confidence"
+                        ]
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "confidence": {
+                        "maximum": 1,
+                        "minimum": 0,
+                        "type": "number"
+                      },
+                      "value": {
+                        "not": {
+                          "type": "null"
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "properties": {
+                "confidence": {
+                  "maximum": 1,
+                  "minimum": 0,
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "state": {
+                  "enum": [
+                    "known",
+                    "unknown",
+                    "low_confidence"
+                  ]
+                },
+                "value": {}
+              },
+              "required": [
+                "state",
+                "value",
+                "confidence"
+              ],
+              "type": "object"
+            },
+            "mode": {
+              "enum": [
+                "transcription",
+                "arrangement"
+              ]
+            }
+          },
+          "required": [
+            "instrument",
+            "mode",
+            "instrument_presence",
+            "events"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    }
+  ],
+  "description": "Versioned README P0 contract for TrackIR",
+  "title": "TrackIR",
+  "x-common-required": [
+    "artifact_type",
+    "artifact_id",
+    "content_hash",
+    "schema_version",
+    "source_artifact_ids",
+    "source_artifacts",
+    "generator",
+    "created_at",
+    "environment",
+    "status",
+    "confidence",
+    "failure",
+    "human_correction",
+    "migration",
+    "payload"
+  ],
+  "x-schema-version": "1.0.0"
+}

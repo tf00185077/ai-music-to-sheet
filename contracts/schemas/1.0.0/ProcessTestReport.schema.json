@@ -1,0 +1,114 @@
+{
+  "$id": "https://ai-music-to-sheet.invalid/contracts/1.0.0/ProcessTestReport.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "allOf": [
+    {
+      "$ref": "common.schema.json"
+    },
+    {
+      "properties": {
+        "artifact_type": {
+          "const": "ProcessTestReport"
+        },
+        "payload": {
+          "additionalProperties": true,
+          "properties": {
+            "artifact_paths": {
+              "type": "array"
+            },
+            "automatic_benchmark": {
+              "type": "boolean"
+            },
+            "candidate_sha": {
+              "type": "string"
+            },
+            "checks": {
+              "minItems": 1,
+              "type": "array"
+            },
+            "dataset_version": {
+              "type": "string"
+            },
+            "dirty_tree_before_run": {
+              "type": "boolean"
+            },
+            "evaluation_reports": {
+              "type": "array"
+            },
+            "executed_checks": {
+              "type": "array"
+            },
+            "execution_environment": {
+              "type": "object"
+            },
+            "expected_checks": {
+              "type": "array"
+            },
+            "input_checksum": {
+              "type": "string"
+            },
+            "log_references": {
+              "type": "array"
+            },
+            "run_id": {
+              "type": "string"
+            },
+            "stages": {
+              "type": "array"
+            },
+            "test_case_id": {
+              "type": "string"
+            },
+            "timing": {
+              "type": "object"
+            },
+            "versions": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "run_id",
+            "test_case_id",
+            "input_checksum",
+            "dataset_version",
+            "stages",
+            "versions",
+            "timing",
+            "execution_environment",
+            "artifact_paths",
+            "log_references",
+            "checks",
+            "evaluation_reports",
+            "automatic_benchmark",
+            "expected_checks",
+            "executed_checks",
+            "candidate_sha",
+            "dirty_tree_before_run"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    }
+  ],
+  "description": "Versioned README P0 contract for ProcessTestReport",
+  "title": "ProcessTestReport",
+  "x-common-required": [
+    "artifact_type",
+    "artifact_id",
+    "content_hash",
+    "schema_version",
+    "source_artifact_ids",
+    "source_artifacts",
+    "generator",
+    "created_at",
+    "environment",
+    "status",
+    "confidence",
+    "failure",
+    "human_correction",
+    "migration",
+    "payload"
+  ],
+  "x-schema-version": "1.0.0"
+}

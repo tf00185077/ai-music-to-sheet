@@ -1,0 +1,72 @@
+{
+  "$id": "https://ai-music-to-sheet.invalid/contracts/1.0.0/SourceMedia.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "allOf": [
+    {
+      "$ref": "common.schema.json"
+    },
+    {
+      "properties": {
+        "artifact_type": {
+          "const": "SourceMedia"
+        },
+        "payload": {
+          "additionalProperties": true,
+          "properties": {
+            "byte_size": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "file_format": {
+              "type": "string"
+            },
+            "media_sha256": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "source_identifier": {
+              "type": "string"
+            },
+            "track_count": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "usage_rights": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "file_format",
+            "media_sha256",
+            "byte_size",
+            "track_count",
+            "source_identifier",
+            "usage_rights"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    }
+  ],
+  "description": "Versioned README P0 contract for SourceMedia",
+  "title": "SourceMedia",
+  "x-common-required": [
+    "artifact_type",
+    "artifact_id",
+    "content_hash",
+    "schema_version",
+    "source_artifact_ids",
+    "source_artifacts",
+    "generator",
+    "created_at",
+    "environment",
+    "status",
+    "confidence",
+    "failure",
+    "human_correction",
+    "migration",
+    "payload"
+  ],
+  "x-schema-version": "1.0.0"
+}

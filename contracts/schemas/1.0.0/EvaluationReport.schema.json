@@ -1,0 +1,79 @@
+{
+  "$id": "https://ai-music-to-sheet.invalid/contracts/1.0.0/EvaluationReport.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "allOf": [
+    {
+      "$ref": "common.schema.json"
+    },
+    {
+      "properties": {
+        "artifact_type": {
+          "const": "EvaluationReport"
+        },
+        "payload": {
+          "additionalProperties": true,
+          "properties": {
+            "artifact_paths": {
+              "minItems": 1,
+              "type": "array"
+            },
+            "dataset_version": {
+              "type": "string"
+            },
+            "evaluated_artifact_ids": {
+              "minItems": 1,
+              "type": "array"
+            },
+            "evaluator": {
+              "type": "object"
+            },
+            "metrics": {
+              "type": "object"
+            },
+            "process_test_report_id": {
+              "type": "string"
+            },
+            "run_id": {
+              "type": "string"
+            },
+            "thresholds": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "run_id",
+            "dataset_version",
+            "evaluated_artifact_ids",
+            "evaluator",
+            "metrics",
+            "thresholds",
+            "artifact_paths",
+            "process_test_report_id"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    }
+  ],
+  "description": "Versioned README P0 contract for EvaluationReport",
+  "title": "EvaluationReport",
+  "x-common-required": [
+    "artifact_type",
+    "artifact_id",
+    "content_hash",
+    "schema_version",
+    "source_artifact_ids",
+    "source_artifacts",
+    "generator",
+    "created_at",
+    "environment",
+    "status",
+    "confidence",
+    "failure",
+    "human_correction",
+    "migration",
+    "payload"
+  ],
+  "x-schema-version": "1.0.0"
+}

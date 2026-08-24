@@ -1,0 +1,28 @@
+name: verify-p0
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - name: Verify README P0 baseline
+        run: ./scripts/verify-p0 --output artifacts/p0/latest
+      - name: Retain P0 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p0-evidence-${{ github.sha }}
+          path: artifacts/p0/latest
+          if-no-files-found: error
+          retention-days: 30

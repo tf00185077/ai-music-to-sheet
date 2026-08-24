@@ -1,0 +1,29 @@
+{
+  "schema_vector_version": "1.0.0",
+  "supported_same_major": [
+    {
+      "writer": "1.1.0",
+      "reader": "1.0.0",
+      "change": "additive optional top-level field",
+      "expected": "read_success",
+      "exercised_by": "tests.test_contracts.SchemaContractTests.test_b_same_major_extension_reads_and_unsupported_major_rejects"
+    }
+  ],
+  "unsupported_major": [
+    {
+      "writer": "9.0.0",
+      "reader": "1.0.0",
+      "expected": "unsupported_major structured rejection",
+      "exercised_by": "tests.test_contracts.SchemaContractTests.test_b_same_major_extension_reads_and_unsupported_major_rejects"
+    }
+  ],
+  "legacy_migrations": [
+    {
+      "source": "0.9.0 TrackIR",
+      "target": "1.0.0 TrackIR",
+      "expected": "new artifact ID, embedded source snapshot, migration lineage, equal normalized musical semantics",
+      "allowed_semantic_differences": [],
+      "exercised_by": "tests.test_contracts.SchemaContractTests.test_b_migration_preserves_source_and_musical_semantics"
+    }
+  ]
+}

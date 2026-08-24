@@ -1,0 +1,10 @@
+{
+  "events": [
+    {
+      "offset_seconds": 0.25,
+      "onset_seconds": 0.0,
+      "pitch": 64
+    }
+  ],
+  "instrument": "guitar"
+}

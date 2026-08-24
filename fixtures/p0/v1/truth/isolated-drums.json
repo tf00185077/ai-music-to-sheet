@@ -1,0 +1,13 @@
+{
+  "events": [
+    {
+      "class": "kick",
+      "onset_seconds": 0.0
+    },
+    {
+      "class": "kick",
+      "onset_seconds": 0.125
+    }
+  ],
+  "instrument": "drums"
+}

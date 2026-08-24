@@ -1,0 +1,6 @@
+[project]
+name = "ai-music-to-sheet-p0"
+version = "1.0.0"
+description = "Dependency-free README P0 artifact-contract and verification baseline"
+requires-python = ">=3.9"
+dependencies = []

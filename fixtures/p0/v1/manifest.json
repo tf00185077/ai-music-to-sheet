@@ -1,0 +1,319 @@
+{
+  "conventions": {
+    "coordinate_origin": 0,
+    "instrument_taxonomy": "p0-instruments/1.0.0: drums,piano,guitar,other",
+    "pitch_standard": "MIDI note 0-127, A4=440Hz",
+    "time_unit": "seconds",
+    "wave_format": {
+      "channels": 1,
+      "sample_format": "pcm_s16le",
+      "sample_rate": 8000
+    }
+  },
+  "dataset_version": "p0-fixtures/1.0.0",
+  "fixtures": [
+    {
+      "annotation_version": "1.0.0",
+      "category": "exact_synthetic",
+      "dataset_version": "p0-fixtures/1.0.0",
+      "files": [
+        {
+          "bytes": 4044,
+          "path": "audio/exact-synthetic.wav",
+          "sha256": "ac5f8f645de63366bfd0521cb57fe0a4c51371197ae80b3dce1f006a6534f5ad"
+        },
+        {
+          "bytes": 70,
+          "path": "truth/exact-synthetic.json",
+          "sha256": "52003ebf9fabdfbc88695451ed084c2818dddd96f6c2dabf4445b33c0e201fa9"
+        }
+      ],
+      "fixture_id": "p0-exact-synthetic-v1",
+      "ground_truth": {
+        "kind": "exact_synthetic",
+        "path": "truth/exact-synthetic.json"
+      },
+      "license": {
+        "owner": "ai-music-to-sheet project",
+        "provenance": "deterministically generated in-repository",
+        "spdx": "CC0-1.0"
+      },
+      "purpose": "README P0 contract and evaluator validation only",
+      "split": "transparent-validation",
+      "usage_restriction": "No real-song, unseen-song, separation, transcription, arrangement, or perceptual-quality claim"
+    },
+    {
+      "annotation_version": "1.0.0",
+      "category": "rendered_events",
+      "dataset_version": "p0-fixtures/1.0.0",
+      "files": [
+        {
+          "bytes": 4044,
+          "path": "audio/rendered-events.wav",
+          "sha256": "5ed303396796e2f742e2d28448c7d0aa6a7a246e6a1a811cb3bda0ea6ecb7437"
+        },
+        {
+          "bytes": 141,
+          "path": "truth/rendered-events.json",
+          "sha256": "f792b673c9199044128fbe2ac6a4196d8e056d0560e20cbc168b3f569a1137ca"
+        }
+      ],
+      "fixture_id": "p0-rendered-events-v1",
+      "ground_truth": {
+        "kind": "rendered_events",
+        "path": "truth/rendered-events.json"
+      },
+      "license": {
+        "owner": "ai-music-to-sheet project",
+        "provenance": "deterministically generated in-repository",
+        "spdx": "CC0-1.0"
+      },
+      "purpose": "README P0 contract and evaluator validation only",
+      "split": "transparent-validation",
+      "usage_restriction": "No real-song, unseen-song, separation, transcription, arrangement, or perceptual-quality claim"
+    },
+    {
+      "annotation_version": "1.0.0",
+      "category": "isolated_drums",
+      "dataset_version": "p0-fixtures/1.0.0",
+      "files": [
+        {
+          "bytes": 4044,
+          "path": "audio/isolated-drums.wav",
+          "sha256": "daebff8ca1f275f64748709a95296e9fad42ac0be956d1d71b0e33add1ac85b1"
+        },
+        {
+          "bytes": 174,
+          "path": "truth/isolated-drums.json",
+          "sha256": "fc872d4331aa015e7b8573a035cb431db7feea997fe21735976131c459430bf1"
+        }
+      ],
+      "fixture_id": "p0-isolated-drums-v1",
+      "ground_truth": {
+        "kind": "isolated_drums",
+        "path": "truth/isolated-drums.json"
+      },
+      "license": {
+        "owner": "ai-music-to-sheet project",
+        "provenance": "deterministically generated in-repository",
+        "spdx": "CC0-1.0"
+      },
+      "purpose": "README P0 contract and evaluator validation only",
+      "split": "transparent-validation",
+      "usage_restriction": "No real-song, unseen-song, separation, transcription, arrangement, or perceptual-quality claim"
+    },
+    {
+      "annotation_version": "1.0.0",
+      "category": "isolated_piano",
+      "dataset_version": "p0-fixtures/1.0.0",
+      "files": [
+        {
+          "bytes": 4044,
+          "path": "audio/isolated-piano.wav",
+          "sha256": "349d77454bfe2a89136623cface314ec1943134780d64e8a3d988b2a96d16db3"
+        },
+        {
+          "bytes": 135,
+          "path": "truth/isolated-piano.json",
+          "sha256": "d4ab00aa67ed6a46470852750a50248df353845bfff014e217c87859ebdc957b"
+        }
+      ],
+      "fixture_id": "p0-isolated-piano-v1",
+      "ground_truth": {
+        "kind": "isolated_piano",
+        "path": "truth/isolated-piano.json"
+      },
+      "license": {
+        "owner": "ai-music-to-sheet project",
+        "provenance": "deterministically generated in-repository",
+        "spdx": "CC0-1.0"
+      },
+      "purpose": "README P0 contract and evaluator validation only",
+      "split": "transparent-validation",
+      "usage_restriction": "No real-song, unseen-song, separation, transcription, arrangement, or perceptual-quality claim"
+    },
+    {
+      "annotation_version": "1.0.0",
+      "category": "isolated_guitar",
+      "dataset_version": "p0-fixtures/1.0.0",
+      "files": [
+        {
+          "bytes": 4044,
+          "path": "audio/isolated-guitar.wav",
+          "sha256": "c2ff9b33d1e23a970de6cbd30864607a8b83b711fe58e8b1a0ee4fcdb2b23a0c"
+        },
+        {
+          "bytes": 136,
+          "path": "truth/isolated-guitar.json",
+          "sha256": "c5996e8474327b46b0d2492b6b392d6ab81b30dce67b2bdee8578707925c8027"
+        }
+      ],
+      "fixture_id": "p0-isolated-guitar-v1",
+      "ground_truth": {
+        "kind": "isolated_guitar",
+        "path": "truth/isolated-guitar.json"
+      },
+      "license": {
+        "owner": "ai-music-to-sheet project",
+        "provenance": "deterministically generated in-repository",
+        "spdx": "CC0-1.0"
+      },
+      "purpose": "README P0 contract and evaluator validation only",
+      "split": "transparent-validation",
+      "usage_restriction": "No real-song, unseen-song, separation, transcription, arrangement, or perceptual-quality claim"
+    },
+    {
+      "annotation_version": "1.0.0",
+      "category": "annotated_mix",
+      "dataset_version": "p0-fixtures/1.0.0",
+      "files": [
+        {
+          "bytes": 4044,
+          "path": "audio/annotated-mix.wav",
+          "sha256": "142d4e865b491b6575adb108991b59891f29cc67b9f410c1c42a8fda70a13734"
+        },
+        {
+          "bytes": 340,
+          "path": "truth/annotated-mix.json",
+          "sha256": "bccd9f639705a016907955059625273a00b803742d191465a18fb89cc9068174"
+        }
+      ],
+      "fixture_id": "p0-annotated-mix-v1",
+      "ground_truth": {
+        "kind": "annotated_mix",
+        "path": "truth/annotated-mix.json"
+      },
+      "license": {
+        "owner": "ai-music-to-sheet project",
+        "provenance": "deterministically generated in-repository",
+        "spdx": "CC0-1.0"
+      },
+      "purpose": "README P0 contract and evaluator validation only",
+      "split": "transparent-validation",
+      "usage_restriction": "No real-song, unseen-song, separation, transcription, arrangement, or perceptual-quality claim"
+    },
+    {
+      "annotation_version": "1.0.0",
+      "category": "absent_target",
+      "dataset_version": "p0-fixtures/1.0.0",
+      "files": [
+        {
+          "bytes": 4044,
+          "path": "audio/absent-target.wav",
+          "sha256": "e71f03b01226b36f56f69fc54cd391a0af32d3835b2b7037fe67383230907c41"
+        },
+        {
+          "bytes": 48,
+          "path": "truth/absent-target.json",
+          "sha256": "9d8826cad4cd85241830434e4cea1182cc0ce3a521c5e9ac2c138b7eb1e5eec4"
+        }
+      ],
+      "fixture_id": "p0-absent-target-v1",
+      "ground_truth": {
+        "kind": "absent_target",
+        "path": "truth/absent-target.json"
+      },
+      "license": {
+        "owner": "ai-music-to-sheet project",
+        "provenance": "deterministically generated in-repository",
+        "spdx": "CC0-1.0"
+      },
+      "purpose": "README P0 contract and evaluator validation only",
+      "split": "transparent-validation",
+      "usage_restriction": "No real-song, unseen-song, separation, transcription, arrangement, or perceptual-quality claim"
+    },
+    {
+      "annotation_version": "1.0.0",
+      "category": "low_volume",
+      "dataset_version": "p0-fixtures/1.0.0",
+      "files": [
+        {
+          "bytes": 4044,
+          "path": "audio/low-volume.wav",
+          "sha256": "6d1dac7a19f33112d207fcef06187aea7294019c8c725381094c800e37b5cae1"
+        },
+        {
+          "bytes": 82,
+          "path": "truth/low-volume.json",
+          "sha256": "c6d99937fe55a1ad9617028f2a83b41d9665ba984880e2813f90080af5f98374"
+        }
+      ],
+      "fixture_id": "p0-low-volume-v1",
+      "ground_truth": {
+        "kind": "low_volume",
+        "path": "truth/low-volume.json"
+      },
+      "license": {
+        "owner": "ai-music-to-sheet project",
+        "provenance": "deterministically generated in-repository",
+        "spdx": "CC0-1.0"
+      },
+      "purpose": "README P0 contract and evaluator validation only",
+      "split": "transparent-validation",
+      "usage_restriction": "No real-song, unseen-song, separation, transcription, arrangement, or perceptual-quality claim"
+    },
+    {
+      "annotation_version": "1.0.0",
+      "category": "partial_presence",
+      "dataset_version": "p0-fixtures/1.0.0",
+      "files": [
+        {
+          "bytes": 4044,
+          "path": "audio/partial-presence.wav",
+          "sha256": "f525d7d56283e6b59e47720b91f70d8be5dfe595192e4c0ef7e86a7fae2e8a41"
+        },
+        {
+          "bytes": 111,
+          "path": "truth/partial-presence.json",
+          "sha256": "8b113509b1df2ac58ce67f5d3fb59b1769a64f20c80a32db58db0f54c7b3f56c"
+        }
+      ],
+      "fixture_id": "p0-partial-presence-v1",
+      "ground_truth": {
+        "kind": "partial_presence",
+        "path": "truth/partial-presence.json"
+      },
+      "license": {
+        "owner": "ai-music-to-sheet project",
+        "provenance": "deterministically generated in-repository",
+        "spdx": "CC0-1.0"
+      },
+      "purpose": "README P0 contract and evaluator validation only",
+      "split": "transparent-validation",
+      "usage_restriction": "No real-song, unseen-song, separation, transcription, arrangement, or perceptual-quality claim"
+    },
+    {
+      "annotation_version": "1.0.0",
+      "category": "masking",
+      "dataset_version": "p0-fixtures/1.0.0",
+      "files": [
+        {
+          "bytes": 4044,
+          "path": "audio/masking.wav",
+          "sha256": "66dd7a560a2c0f1cbd1b7f1bb323c09c89ffc575595560aa9a1edd227408ce39"
+        },
+        {
+          "bytes": 73,
+          "path": "truth/masking.json",
+          "sha256": "e61df36b63e45f2e47d7adf87a96e293ac0900fe25ddc15bf399008be6b1f232"
+        }
+      ],
+      "fixture_id": "p0-masking-v1",
+      "ground_truth": {
+        "kind": "masking",
+        "path": "truth/masking.json"
+      },
+      "license": {
+        "owner": "ai-music-to-sheet project",
+        "provenance": "deterministically generated in-repository",
+        "spdx": "CC0-1.0"
+      },
+      "purpose": "README P0 contract and evaluator validation only",
+      "split": "transparent-validation",
+      "usage_restriction": "No real-song, unseen-song, separation, transcription, arrangement, or perceptual-quality claim"
+    }
+  ],
+  "generated_by": "p0.fixture_builder/1.0.0",
+  "immutable": true,
+  "seed": 20260824
+}

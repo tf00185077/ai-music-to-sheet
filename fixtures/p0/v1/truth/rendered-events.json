@@ -1,0 +1,12 @@
+{
+  "events": [
+    {
+      "onset_seconds": 0.0,
+      "pitch": 60
+    },
+    {
+      "onset_seconds": 0.125,
+      "pitch": 60
+    }
+  ]
+}

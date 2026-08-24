@@ -1,0 +1,5 @@
+{
+  "masker": "bass_sine",
+  "presence": "masked",
+  "target": "drums"
+}

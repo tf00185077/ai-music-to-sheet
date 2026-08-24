@@ -1,0 +1,57 @@
+{
+  "$id": "https://ai-music-to-sheet.invalid/contracts/1.0.0/StemSet.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "allOf": [
+    {
+      "$ref": "common.schema.json"
+    },
+    {
+      "properties": {
+        "artifact_type": {
+          "const": "StemSet"
+        },
+        "payload": {
+          "additionalProperties": true,
+          "properties": {
+            "stems": {
+              "items": {
+                "type": "object"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
+            "taxonomy_version": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "taxonomy_version",
+            "stems"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    }
+  ],
+  "description": "Versioned README P0 contract for StemSet",
+  "title": "StemSet",
+  "x-common-required": [
+    "artifact_type",
+    "artifact_id",
+    "content_hash",
+    "schema_version",
+    "source_artifact_ids",
+    "source_artifacts",
+    "generator",
+    "created_at",
+    "environment",
+    "status",
+    "confidence",
+    "failure",
+    "human_correction",
+    "migration",
+    "payload"
+  ],
+  "x-schema-version": "1.0.0"
+}

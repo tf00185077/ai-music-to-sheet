@@ -1,0 +1,13 @@
+{
+  "artifacts": {
+    "CanonicalAudio": "CanonicalAudio.schema.json",
+    "EvaluationReport": "EvaluationReport.schema.json",
+    "NotationIR": "NotationIR.schema.json",
+    "ProcessTestReport": "ProcessTestReport.schema.json",
+    "SongAnalysis": "SongAnalysis.schema.json",
+    "SourceMedia": "SourceMedia.schema.json",
+    "StemSet": "StemSet.schema.json",
+    "TrackIR": "TrackIR.schema.json"
+  },
+  "schema_version": "1.0.0"
+}

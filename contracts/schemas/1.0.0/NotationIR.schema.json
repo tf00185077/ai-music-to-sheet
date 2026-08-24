@@ -1,0 +1,78 @@
+{
+  "$id": "https://ai-music-to-sheet.invalid/contracts/1.0.0/NotationIR.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "allOf": [
+    {
+      "$ref": "common.schema.json"
+    },
+    {
+      "properties": {
+        "artifact_type": {
+          "const": "NotationIR"
+        },
+        "payload": {
+          "additionalProperties": true,
+          "properties": {
+            "instrument": {
+              "enum": [
+                "drums",
+                "piano",
+                "guitar"
+              ]
+            },
+            "instrument_notation": {
+              "type": "object"
+            },
+            "measures": {
+              "minItems": 1,
+              "type": "array"
+            },
+            "staff": {
+              "minItems": 1,
+              "type": "array"
+            },
+            "ties": {
+              "type": "array"
+            },
+            "track_mode": {
+              "enum": [
+                "transcription",
+                "arrangement"
+              ]
+            }
+          },
+          "required": [
+            "track_mode",
+            "instrument",
+            "measures",
+            "staff",
+            "ties",
+            "instrument_notation"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    }
+  ],
+  "description": "Versioned README P0 contract for NotationIR",
+  "title": "NotationIR",
+  "x-common-required": [
+    "artifact_type",
+    "artifact_id",
+    "content_hash",
+    "schema_version",
+    "source_artifact_ids",
+    "source_artifacts",
+    "generator",
+    "created_at",
+    "environment",
+    "status",
+    "confidence",
+    "failure",
+    "human_correction",
+    "migration",
+    "payload"
+  ],
+  "x-schema-version": "1.0.0"
+}

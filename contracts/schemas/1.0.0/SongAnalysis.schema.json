@@ -1,0 +1,212 @@
+{
+  "$id": "https://ai-music-to-sheet.invalid/contracts/1.0.0/SongAnalysis.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "allOf": [
+    {
+      "$ref": "common.schema.json"
+    },
+    {
+      "properties": {
+        "artifact_type": {
+          "const": "SongAnalysis"
+        },
+        "payload": {
+          "additionalProperties": true,
+          "properties": {
+            "beats": {
+              "type": "array"
+            },
+            "downbeats": {
+              "type": "array"
+            },
+            "key": {
+              "additionalProperties": true,
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "state": {
+                        "const": "unknown"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "confidence": {
+                        "type": "null"
+                      },
+                      "value": {
+                        "type": "null"
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "state": {
+                        "enum": [
+                          "known",
+                          "low_confidence"
+                        ]
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "confidence": {
+                        "maximum": 1,
+                        "minimum": 0,
+                        "type": "number"
+                      },
+                      "value": {
+                        "not": {
+                          "type": "null"
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "properties": {
+                "confidence": {
+                  "maximum": 1,
+                  "minimum": 0,
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "state": {
+                  "enum": [
+                    "known",
+                    "unknown",
+                    "low_confidence"
+                  ]
+                },
+                "value": {}
+              },
+              "required": [
+                "state",
+                "value",
+                "confidence"
+              ],
+              "type": "object"
+            },
+            "meter": {
+              "additionalProperties": true,
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "state": {
+                        "const": "unknown"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "confidence": {
+                        "type": "null"
+                      },
+                      "value": {
+                        "type": "null"
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "state": {
+                        "enum": [
+                          "known",
+                          "low_confidence"
+                        ]
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "confidence": {
+                        "maximum": 1,
+                        "minimum": 0,
+                        "type": "number"
+                      },
+                      "value": {
+                        "not": {
+                          "type": "null"
+                        }
+                      }
+                    }
+                  }
+                }
+              ],
+              "properties": {
+                "confidence": {
+                  "maximum": 1,
+                  "minimum": 0,
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "state": {
+                  "enum": [
+                    "known",
+                    "unknown",
+                    "low_confidence"
+                  ]
+                },
+                "value": {}
+              },
+              "required": [
+                "state",
+                "value",
+                "confidence"
+              ],
+              "type": "object"
+            },
+            "sections": {
+              "type": "array"
+            },
+            "tempo_map": {
+              "minItems": 1,
+              "type": "array"
+            }
+          },
+          "required": [
+            "tempo_map",
+            "beats",
+            "downbeats",
+            "meter",
+            "key",
+            "sections"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    }
+  ],
+  "description": "Versioned README P0 contract for SongAnalysis",
+  "title": "SongAnalysis",
+  "x-common-required": [
+    "artifact_type",
+    "artifact_id",
+    "content_hash",
+    "schema_version",
+    "source_artifact_ids",
+    "source_artifacts",
+    "generator",
+    "created_at",
+    "environment",
+    "status",
+    "confidence",
+    "failure",
+    "human_correction",
+    "migration",
+    "payload"
+  ],
+  "x-schema-version": "1.0.0"
+}

@@ -1,0 +1,77 @@
+{
+  "$id": "https://ai-music-to-sheet.invalid/contracts/1.0.0/CanonicalAudio.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "allOf": [
+    {
+      "$ref": "common.schema.json"
+    },
+    {
+      "properties": {
+        "artifact_type": {
+          "const": "CanonicalAudio"
+        },
+        "payload": {
+          "additionalProperties": true,
+          "properties": {
+            "audio_sha256": {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            "channel_layout": {
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "type": "array"
+            },
+            "duration_seconds": {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            "sample_format": {
+              "enum": [
+                "pcm_s16le",
+                "pcm_s24le",
+                "float32"
+              ]
+            },
+            "sample_rate": {
+              "maximum": 384000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "sample_rate",
+            "channel_layout",
+            "sample_format",
+            "duration_seconds",
+            "audio_sha256"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    }
+  ],
+  "description": "Versioned README P0 contract for CanonicalAudio",
+  "title": "CanonicalAudio",
+  "x-common-required": [
+    "artifact_type",
+    "artifact_id",
+    "content_hash",
+    "schema_version",
+    "source_artifact_ids",
+    "source_artifacts",
+    "generator",
+    "created_at",
+    "environment",
+    "status",
+    "confidence",
+    "failure",
+    "human_correction",
+    "migration",
+    "payload"
+  ],
+  "x-schema-version": "1.0.0"
+}
