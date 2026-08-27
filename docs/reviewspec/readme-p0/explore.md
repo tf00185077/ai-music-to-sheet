@@ -32,4 +32,3 @@ Repository evidence at starting SHA `f4ff4de0e6afaf3e82698afa97d20ef7c73a8e92` i
 - Since the repository supplies no licensed dataset or hidden corpus, freeze a transparent fixture-manifest requirement but make no holdout or real-model-quality claim.
 - Require a real filesystem/process boundary and reviewer break-testing for the contract harness; mocks cannot stand in for the files, checksums, serialization, command exit status, or report artifacts being claimed.
 - Keep P0 as one coupled build: schema, fixture, evaluator, provenance, report, and deterministic stub are independently testable but do not deliver the README objective in isolation. Separate issues are justified only for independent Design Review, Build, and Independent Review ownership gates.
-

@@ -19,4 +19,3 @@
 | readme-p0/INT-9 | Core | tests/test_pipeline_reports.py::PipelineAndReportTests::test_g_absent_unresolved_cross_mode_and_stale_flows_stop_at_boundary | docs/reviewspec/readme-p0/review.md |
 
 **Active intents: 10.** The review-gate must confirm every one still has a passing test each round; a lost or failing guarding test is a regression (FAIL), unless the intent was formally superseded via a spec amendment.
-
