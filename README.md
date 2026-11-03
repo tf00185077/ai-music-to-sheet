@@ -1,5 +1,8 @@
 # 原曲轉樂譜與樂器改編
 
+[Role-scoped reading and deployed skill bindings](docs/agent-reading.md) govern planning/history reads and repository-branch handling; existing product and role authorities remain in force.
+
+
 > [!IMPORTANT]
 > 本文件記錄專案的初步討論結果，不是不可變更的最終規格。專案目標、流程切割與里程碑都可以隨研究結果持續討論及修改。本文刻意不指定技術棧，也不描述更詳細的實作方法。
 
